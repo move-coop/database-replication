@@ -1,0 +1,9 @@
+services:
+  tmc-dlt:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile
+    env_file:
+      - test.env
+    volumes:
+      - .:/app
