@@ -2,41 +2,13 @@ import os
 from typing import Optional
 
 import dlt
-from dlt.sources.sql_database import sql_database
 from sqlalchemy import create_engine, text
 
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
 from utilities.logger import logger
+from utilities.setup import get_jdbc_connection_string, set_dlt_environment_variables
 
 ##########
-
-
-def set_dlt_environment_variables(config: dict) -> None:
-    """
-    Loops through the key / value pairs defined in the
-    environment and sets the appropriate env variables
-    """
-
-    for key, value in config.items():
-        logger.debug(f"Setting {key}...")
-        os.environ[key] = value
-
-
-def get_jdbc_connection_string(config: dict) -> str:
-    """
-    Translates config values into a standard JDBC string
-    """
-
-    resp = "{driver}://{user}:{password}@{host}:{port}/{database}".format(
-        driver=config["SOURCES__SQL_DATABASE__CREDENTIALS__DRIVERNAME"],
-        user=config["SOURCES__SQL_DATABASE__USERNAME"],
-        password=config["SOURCES__SQL_DATABASE__PASSWORD"],
-        host=config["SOURCES__SQL_DATABASE__HOST"],
-        database=config["SOURCES__SQL_DATABASE__DATABASE"],
-        port=config["SOURCES__SQL_DATABASE__PORT"],
-    )
-
-    return resp
 
 
 def query_table_in_segments(
@@ -55,6 +27,7 @@ def query_table_in_segments(
 
     @dlt.resource(name=f"{source_table_name}_segment_{index}")
     def run_query():
+        logger.info(f"Excecuting f{source_table_name}_segment_{index}")
         with engine.connect() as _conn:
             query = f"""
                 WITH numbered AS (
@@ -64,7 +37,12 @@ def query_table_in_segments(
                 SELECT * FROM numbered WHERE rn % {workers} = {index}
             """
 
-            result = _conn.execution_options(stream_results=True).execute(text(query)).mappings()
+            result = (
+                _conn.execution_options(stream_results=True)
+                .execute(text(query))
+                .mappings()
+            )
+            logger.debug("Parsing results...")
             for row in result:
                 yield dict(row)
 
@@ -109,7 +87,10 @@ def run_import(
         f"Beginning pipeline tmc_{vendor_name} [{source_schema_name}.{source_table_name} -> {destination_schema_name}.{destination_table_name}]"
     )
 
-    # TODO - It seems like this ... isn't actually running? It's just hanging out after the log statement above but never errors
+    # TODO - It seems like this ... isn't actually running?
+    # It's just hanging out after the log statement above but never errors
+
+    # TODO - I bet we could thread this thing
     info = pipeline.run(resources)
     print(info)
 
