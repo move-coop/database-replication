@@ -27,7 +27,7 @@ def query_table_in_segments(
 
     @dlt.resource(name=f"{source_table_name}_segment_{index}")
     def run_query():
-        logger.info(f"Excecuting f{source_table_name}_segment_{index}")
+        logger.info(f"Excecuting {source_table_name}_segment_{index}")
         with engine.connect() as _conn:
             query = f"""
                 WITH numbered AS (
@@ -46,7 +46,7 @@ def query_table_in_segments(
             for row in result:
                 yield dict(row)
 
-    return run_query
+    return run_query()
 
 
 def run_import(
@@ -69,6 +69,7 @@ def run_import(
         destination="bigquery",
         dataset_name=destination_schema_name,
         full_refresh=full_refresh,
+        progress="log",
     )
 
     # Breaks up source table in x number of jobs (1 per worker)
@@ -86,9 +87,6 @@ def run_import(
     logger.info(
         f"Beginning pipeline tmc_{vendor_name} [{source_schema_name}.{source_table_name} -> {destination_schema_name}.{destination_table_name}]"
     )
-
-    # TODO - It seems like this ... isn't actually running?
-    # It's just hanging out after the log statement above but never errors
 
     # TODO - I bet we could thread this thing
     info = pipeline.run(resources)

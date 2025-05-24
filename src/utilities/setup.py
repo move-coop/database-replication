@@ -1,6 +1,6 @@
 import os
 
-from logger import logger
+from utilities.logger import logger
 
 
 def set_dlt_environment_variables(config: dict) -> None:
