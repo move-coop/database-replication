@@ -1,7 +1,8 @@
 import json
 import os
 from dotenv import load_dotenv
-load_dotenv()
+# TODO use more standard .env name
+load_dotenv(dotenv_path='test.env')
 
 ##########
 
