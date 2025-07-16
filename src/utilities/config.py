@@ -1,5 +1,7 @@
 import json
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 ##########
 
@@ -37,4 +39,7 @@ SQL_SOURCE_CONFIG = {
     "SOURCES__SQL_DATABASE__PORT": os.environ.get("SOURCE_PORT"),
     "SOURCES__SQL_DATABASE__USERNAME": os.environ.get("SOURCE_USERNAME"),
     "SOURCES__SQL_DATABASE__PASSWORD": os.environ.get("SOURCE_PASSWORD"),
+    "SOURCES__SQL_DATABASE__SSL": os.environ.get("SOURCE_SSL", "false").lower() == "true",
+    "SOURCES__SQL_DATABASE__SSL_CERT": os.environ.get("SOURCE_SSL_CERT"),
+    "SOURCES__SQL_DATABASE__SSL_KEY": os.environ.get("SOURCE_SSL_KEY"),
 }
