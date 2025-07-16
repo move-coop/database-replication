@@ -2,6 +2,7 @@ import os
 
 import dlt
 import psycopg2
+from typing import List
 
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
 from utilities.logger import logger
@@ -39,9 +40,8 @@ def pg_source():
 def run_import(
     vendor_name: str,
     source_schema_name: str,
-    source_table_names: list,
+    source_table_names: List[str],
     destination_schema_name: str,
-    full_refresh: bool,
     connection_string: str,
 ):
     """
@@ -53,7 +53,6 @@ def run_import(
         pipeline_name=f"tmc_{vendor_name}",
         destination="bigquery",
         dataset_name=destination_schema_name,
-        full_refresh=full_refresh,
         progress="log",
     )
 
@@ -92,15 +91,13 @@ if __name__ == "__main__":
         table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")
     ]
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
-    DESTINATON_TABLE_NAME = os.environ["DESTINATION_TABLE_NAME"]
 
     FULL_REFRESH = os.environ.get("FULL_REFRESH") == "true"
 
     run_import(
         vendor_name=VENDOR_NAME.lower().replace(" ", "_"),
         source_schema_name=SOURCE_SCHEMA_NAME,
-        source_table_name=SOURCE_TABLE_NAMES,
+        source_table_names=SOURCE_TABLE_NAMES,
         destination_schema_name=DESTINATION_SCHEMA_NAME,
-        full_refresh=FULL_REFRESH,
         connection_string=CONNECTION_STRING,
     )
