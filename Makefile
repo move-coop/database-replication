@@ -4,3 +4,8 @@ run:
 	else \
 		docker compose up; \
 	fi
+
+
+ruff:
+	@ruff check --fix .
+	@ruff format .

@@ -1,10 +1,7 @@
 [tool.ruff]
 line-length = 120
 indent-width = 4
-
-# Assume Python 3.7
 target-version = "py312"
-exclude = ["app/scheduled_tasks/pick_back_up.py"]
 
 
 [tool.ruff.lint]
