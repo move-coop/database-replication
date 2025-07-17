@@ -24,6 +24,10 @@ def get_jdbc_connection_string(config: dict) -> str:
     Translates config values into a standard JDBC string
     """
 
+    # Allow for fully-formed JDBC strings to take precedence here
+    if os.environ.get("JDBC_CONNECTION_STRING"):
+        return os.environ.get("JDBC_CONNECTION_STRING")
+
     resp = "{driver}://{user}:{password}@{host}:{port}/{database}".format(
         driver=config["SOURCES__SQL_DATABASE__CREDENTIALS__DRIVERNAME"],
         user=config["SOURCES__SQL_DATABASE__USERNAME"],
