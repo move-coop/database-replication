@@ -14,6 +14,26 @@ of the individual fields.
 
 TODO - Make this forwards compatible with Google Secrets Manager
 """
+
+# Civis artifacts - we need to read this into memory and save the
+# env variable as a filepath
+if os.environ.get("SOURCE_SSL_CERT_PASSWORD"):
+    with open("/app/src/certicate.crt", "w") as _fp:
+        _fp.write(os.environ.get("SOURCE_SSL_CERT_PASSWORD"))
+        os.environ["SOURCE_SSL_CERT"] = "/app/src/certificate.crt"
+
+if os.environ.get("SOURCE_SSL_KEY_PASSWORD"):
+    with open("/app/src/keyfile.key", "w") as _fp:
+        _fp.write(os.environ.get("SOURCE_SSL_KEY_PASSWORD"))
+        os.environ["SOURCE_SSL_KEY"] = "/app/src/keyfile.key"
+
+if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PASSWORD"):
+    with open("/app/src/app-creds.json", "w") as _fp:
+        _fp.write(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PASSWORD"))
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/app/src/app-creds.json"
+
+###
+
 if os.environ.get("DESTINATION_USE_JSON") == "true":
     if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
         raise OSError("You must set the path to a JSON Service Account Key")
