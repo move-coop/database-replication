@@ -12,29 +12,14 @@ from dlt.sources.sql_database import sql_database
 ##########
 
 
-def pg_source():
-    """
-    Defines connection to remote Postgres and yields result
-    """
+def table_adapter_callback(query, table):
+    if os.environ.get("FILTER_CLAUSE"):
+        from sqlalchemy.sql import text
 
-    with psycopg2.connect(
-        host=os.environ["SOURCE_HOST"],
-        port=os.environ["SOURCE_PORT"],
-        dbname=os.environ["SOURCE_DATABASE"],
-        user=os.environ["SOURCE_USERNAME"],
-        password=os.environ["SOURCE_PASSWORD"],
-    ) as _dlt_connection:
-        with _dlt_connection.cursor() as _dlt_cursor:
-            _dlt_cursor.execute(
-                "SELECT * FROM {}.{}".format(
-                    os.environ["SOURCE_SCHEMA_NAME"], os.environ["SOURCE_TABLE_NAME"]
-                )
-            )
-            columns = [desc[0] for desc in _dlt_cursor.description]
-            for row in _dlt_cursor:
-                yield dict(zip(columns, row))
+        filter_text = os.environ["FILTER_CLAUSE"]
 
-            logger.info(f"Read {_dlt_cursor.rowcount} rows...")
+        query = query.where(text(filter_text))
+    return query
 
 
 def run_import(
@@ -62,6 +47,7 @@ def run_import(
         schema=source_schema_name,
         table_names=source_table_names,
         chunk_size=10_000,
+        query_adapter_callback=table_adapter_callback,
     )
 
     # Kick off the read -> write
