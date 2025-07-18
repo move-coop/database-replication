@@ -24,6 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./devops/Dockerfile
           push: true
           tags: |
             ianrichardferguson/tmc-dlt:${{ github.sha }}
