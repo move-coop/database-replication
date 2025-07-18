@@ -10,7 +10,7 @@ _handler.setFormatter(_formatter)
 
 logger.addHandler(_handler)
 
-if os.environ.get("DEBUG") == "true":
+if os.environ.get("DEBUG_LOG") == "true":
     logger.setLevel(level=10)
 else:
     logger.setLevel(level=20)
