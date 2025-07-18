@@ -44,7 +44,7 @@ def run_import(
         pipeline_name=f"tmc_{vendor_name}",
         destination="bigquery",
         dataset_name=destination_schema_name,
-        progress=dlt.progress.log(log_period=60),
+        progress=dlt.progress.log(log_period=60, logger=logger),
     )
 
     # Setup connection to source database
