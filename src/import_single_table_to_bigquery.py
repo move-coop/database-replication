@@ -38,7 +38,7 @@ def run_import(
         pipeline_name=f"tmc_{vendor_name}",
         destination="bigquery",
         dataset_name=destination_schema_name,
-        progress="log",
+        progress=dlt.progress.log(dump_system_stats=False, log_period=60),
     )
 
     # Setup connection to source database
@@ -73,7 +73,9 @@ if __name__ == "__main__":
     VENDOR_NAME = os.environ["VENDOR_NAME"]
 
     SOURCE_SCHEMA_NAME = os.environ["SOURCE_SCHEMA_NAME"]
-    SOURCE_TABLE_NAMES = [table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")]
+    SOURCE_TABLE_NAMES = [
+        table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")
+    ]
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
 
     FULL_REFRESH = os.environ.get("FULL_REFRESH") == "true"
