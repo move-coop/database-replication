@@ -33,12 +33,18 @@ def run_import(
     Executes an import from a remote host to the destination warehouse
     """
 
+    logger.info(f"Beginning sync to {destination_schema_name}")
+    for table in source_table_names:
+        logger.info(
+            f"{source_schema_name}.{table} -> {destination_schema_name}.{table}"
+        )
+
     # Establish pipeline connection to BigQuery
     pipeline = dlt.pipeline(
         pipeline_name=f"tmc_{vendor_name}",
         destination="bigquery",
         dataset_name=destination_schema_name,
-        progress=dlt.progress.log(dump_system_stats=False, log_period=60),
+        progress=dlt.progress.log(log_period=60),
     )
 
     # Setup connection to source database
