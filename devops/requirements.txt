@@ -3,3 +3,4 @@ dlt[sql_database]>=1.0.0
 psycopg2
 dotenv
 psutil
+google-cloud-bigquery-storage
