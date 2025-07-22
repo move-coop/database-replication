@@ -27,5 +27,5 @@ jobs:
           file: ./devops/Dockerfile
           push: true
           tags: |
-            ianrichardferguson/tmc-dlt:${{ github.sha }}
-            ianrichardferguson/tmc-dlt:latest
+            movementcooperative/tmc-dlt:${{ github.sha }}
+            movementcooperative/tmc-dlt:latest
