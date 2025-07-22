@@ -35,9 +35,7 @@ def run_import(
 
     logger.info(f"Beginning sync to {destination_schema_name}")
     for table in source_table_names:
-        logger.info(
-            f"{source_schema_name}.{table} -> {destination_schema_name}.{table}"
-        )
+        logger.info(f"{source_schema_name}.{table} -> {destination_schema_name}.{table}")
 
     # Establish pipeline connection to BigQuery
     pipeline = dlt.pipeline(
@@ -79,9 +77,7 @@ if __name__ == "__main__":
     VENDOR_NAME = os.environ["VENDOR_NAME"]
 
     SOURCE_SCHEMA_NAME = os.environ["SOURCE_SCHEMA_NAME"]
-    SOURCE_TABLE_NAMES = [
-        table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")
-    ]
+    SOURCE_TABLE_NAMES = [table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")]
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
 
     FULL_REFRESH = os.environ.get("FULL_REFRESH") == "true"

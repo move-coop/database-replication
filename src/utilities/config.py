@@ -8,13 +8,6 @@ load_dotenv(dotenv_path="test.env")
 
 ##########
 
-"""
-This is intended to allow the user to pass in a JSON Service Account Key instead
-of the individual fields.
-
-TODO - Make this forwards compatible with Google Secrets Manager
-"""
-
 # Civis artifacts - we need to read this into memory and save the
 # env variable as a filepath
 if os.environ.get("SOURCE_SSL_CERT_PASSWORD"):
@@ -27,28 +20,29 @@ if os.environ.get("SOURCE_SSL_KEY_PASSWORD"):
         _fp.write(os.environ.get("SOURCE_SSL_KEY_PASSWORD"))
         os.environ["SOURCE_SSL_KEY"] = "/app/src/keyfile.key"
 
+
+# NOTE - This is written with Civis compatability in mind
+# Their custom credential type has a trailing _PASSWORD suffix
 if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PASSWORD"):
     with open("/app/src/app-creds.json", "w") as _fp:
         _fp.write(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PASSWORD"))
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/app/src/app-creds.json"
 
-###
-
 if os.environ.get("DESTINATION_USE_JSON") == "true":
     if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
         raise OSError("You must set the path to a JSON Service Account Key")
 
-    # Load the JSON file and set the environment variables
-    with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as _fp:
-        creds = json.load(_fp)
+# Load the JSON file and set the environment variables
+with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as _fp:
+    creds = json.load(_fp)
 
-        os.environ["DESTINATION_PROJECT_ID"] = creds["project_id"]
-        os.environ["DESTINATION_PRIVATE_KEY"] = creds["private_key"]
-        os.environ["DESTINATION_CLIENT_EMAIL"] = creds["client_email"]
+    os.environ["DESTINATION_PROJECT_ID"] = creds["project_id"]
+    os.environ["DESTINATION_PRIVATE_KEY"] = creds["private_key"]
+    os.environ["DESTINATION_CLIENT_EMAIL"] = creds["client_email"]
 
 
 BIGQUERY_DESTINATION_CONFIG = {
-    "DESTINATION__BIGQUERY__LOCATION": os.environ.get("DESTINATION_LOCATION"),
+    "DESTINATION__BIGQUERY__LOCATION": os.environ.get("DESTINATION_LOCATION", "us"),
     "DESTINATION__BIGQUERY__CREDENTIALS__PROJECT_ID": os.environ.get("DESTINATION_PROJECT_ID"),
     "DESTINATION__BIGQUERY__CREDENTIALS__PRIVATE_KEY": os.environ.get("DESTINATION_PRIVATE_KEY"),
     "DESTINATION__BIGQUERY__CREDENTIALS__CLIENT_EMAIL": os.environ.get("DESTINATION_CLIENT_EMAIL"),
