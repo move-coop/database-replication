@@ -11,14 +11,16 @@ load_dotenv(dotenv_path="test.env")
 # Civis artifacts - we need to read this into memory and save the
 # env variable as a filepath
 if os.environ.get("SOURCE_SSL_CERT_PASSWORD"):
-    with open("/app/src/certicate.crt", "w") as _fp:
+    with open("/app/src/certificate.crt", "w") as _fp:
         _fp.write(os.environ.get("SOURCE_SSL_CERT_PASSWORD"))
         os.environ["SOURCE_SSL_CERT"] = "/app/src/certificate.crt"
+    os.chmod("/app/src/certificate.crt", 0o600)
 
 if os.environ.get("SOURCE_SSL_KEY_PASSWORD"):
     with open("/app/src/keyfile.key", "w") as _fp:
         _fp.write(os.environ.get("SOURCE_SSL_KEY_PASSWORD"))
         os.environ["SOURCE_SSL_KEY"] = "/app/src/keyfile.key"
+    os.chmod("/app/src/keyfile.key", 0o600)
 
 
 # NOTE - This is written with Civis compatability in mind
@@ -27,6 +29,7 @@ if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PASSWORD"):
     with open("/app/src/app-creds.json", "w") as _fp:
         _fp.write(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PASSWORD"))
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/app/src/app-creds.json"
+    os.chmod("/app/src/app-creds.json", 0o600)
 
 if os.environ.get("DESTINATION_USE_JSON") == "true":
     if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
