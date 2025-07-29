@@ -13,4 +13,5 @@ WORKDIR /app/src
 # We never want this enabled, so it's toggled off here by default
 ENV DESTINATION__BIGQUERY__ENABLE_DATASET_NAME_NORMALIZATION=false
 
+
 CMD ["python", "import_single_table_to_bigquery.py"]
