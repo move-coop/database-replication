@@ -6,7 +6,11 @@ from dlt.sources.sql_database import sql_database
 
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
 from utilities.logger import logger
-from utilities.setup import get_jdbc_connection_string, set_dlt_environment_variables
+from utilities.setup import (
+    get_jdbc_connection_string,
+    set_dlt_environment_variables,
+    validate_write_dispostiion,
+)
 
 ##########
 
@@ -27,6 +31,7 @@ def run_import(
     source_table_names: List[str],
     destination_schema_name: str,
     connection_string: str,
+    write_disposition: str,
     row_chunk_size: Optional[int] = 10_000,
 ):
     """
@@ -35,7 +40,9 @@ def run_import(
 
     logger.info(f"Beginning sync to {destination_schema_name}")
     for table in source_table_names:
-        logger.info(f"{source_schema_name}.{table} -> {destination_schema_name}.{table}")
+        logger.info(
+            f"{source_schema_name}.{table} -> {destination_schema_name}.{table}"
+        )
 
     # Establish pipeline connection to BigQuery
     pipeline = dlt.pipeline(
@@ -55,10 +62,7 @@ def run_import(
     )
 
     # Kick off the read -> write
-    info = pipeline.run(
-        source_postgres_connection,
-        write_disposition="replace",  # TODO - Update this to allow for incremental builds
-    )
+    info = pipeline.run(source_postgres_connection, write_disposition=write_disposition)
     logger.info(info)
 
 
@@ -77,11 +81,14 @@ if __name__ == "__main__":
     VENDOR_NAME = os.environ["VENDOR_NAME"]
 
     SOURCE_SCHEMA_NAME = os.environ["SOURCE_SCHEMA_NAME"]
-    SOURCE_TABLE_NAMES = [table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")]
+    SOURCE_TABLE_NAMES = [
+        table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")
+    ]
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
 
-    FULL_REFRESH = os.environ.get("FULL_REFRESH") == "true"
     ROW_CHUNK_SIZE = int(os.environ.get("ROW_CHUNK_SIZE", 10_000))
+    WRITE_DISPOSITION = os.environ["SOURCE_WRITE_DISPOSITION"]
+    validate_write_dispostiion(WRITE_DISPOSITION)
 
     run_import(
         vendor_name=VENDOR_NAME.lower().replace(" ", "_"),
@@ -90,4 +97,5 @@ if __name__ == "__main__":
         destination_schema_name=DESTINATION_SCHEMA_NAME,
         connection_string=CONNECTION_STRING,
         row_chunk_size=ROW_CHUNK_SIZE,
+        write_disposition=WRITE_DISPOSITION,
     )

@@ -38,8 +38,29 @@ def get_jdbc_connection_string(config: dict) -> str:
     )
     if config["SOURCES__SQL_DATABASE__SSL"]:
         resp += "?sslmode=require"
-        if "SOURCES__SQL_DATABASE__SSL_CERT" in config and "SOURCES__SQL_DATABASE__SSL_KEY" in config:
+        if (
+            "SOURCES__SQL_DATABASE__SSL_CERT" in config
+            and "SOURCES__SQL_DATABASE__SSL_KEY" in config
+        ):
             resp += f"&sslcert={config['SOURCES__SQL_DATABASE__SSL_CERT']}&sslkey={config['SOURCES__SQL_DATABASE__SSL_KEY']}"
         else:
             logger.warning("SSL is enabled but no SSL certificate or key is provided.")
     return resp
+
+
+def validate_write_dispostiion(write_disposition: str) -> None:
+    """
+    Validates the write disposition value.
+    Raises ValueError if the value is not valid.
+    """
+    valid_dispositions = ["append", "replace", "merge"]
+    if write_disposition not in valid_dispositions:
+        raise ValueError(
+            f"Invalid write disposition: {write_disposition}. "
+            f"Valid options are: {', '.join(valid_dispositions)}."
+        )
+    # TODO - Someday maybe
+    elif write_disposition == "merge":
+        raise ValueError(
+            "We're not supporting merge as a write disposition yet - all pseduo-incremental loads are handled in dbt"
+        )
