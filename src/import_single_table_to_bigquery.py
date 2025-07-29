@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import dlt
 from dlt.sources.sql_database import sql_database
+from sqlalchemy.dialects.postgresql import ARRAY, JSON, JSONB, VARCHAR
 
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
 from utilities.logger import logger
@@ -11,7 +12,6 @@ from utilities.setup import (
     set_dlt_environment_variables,
     validate_write_dispostiion,
 )
-from sqlalchemy.dialects.postgresql import JSON, VARCHAR, JSONB, ARRAY
 
 ##########
 
@@ -48,7 +48,9 @@ def run_import(
 
     logger.info(f"Beginning sync to {destination_schema_name}")
     for table in source_table_names:
-        logger.info(f"{source_schema_name}.{table} -> {destination_schema_name}.{table}")
+        logger.info(
+            f"{source_schema_name}.{table} -> {destination_schema_name}.{table}"
+        )
     # Establish pipeline connection to BigQuery
     pipeline = dlt.pipeline(
         pipeline_name=f"tmc_{vendor_name}",
@@ -87,12 +89,16 @@ if __name__ == "__main__":
     VENDOR_NAME = os.environ["VENDOR_NAME"]
 
     SOURCE_SCHEMA_NAME = os.environ["SOURCE_SCHEMA_NAME"]
-    SOURCE_TABLE_NAMES = [table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")]
+    SOURCE_TABLE_NAMES = [
+        table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")
+    ]
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
 
     ROW_CHUNK_SIZE = int(os.environ.get("ROW_CHUNK_SIZE", 10_000))
 
-    write_disposition = validate_write_dispostiion(os.environ["SOURCE_WRITE_DISPOSITION"])
+    write_disposition = validate_write_dispostiion(
+        os.environ["SOURCE_WRITE_DISPOSITION"]
+    )
     run_import(
         vendor_name=VENDOR_NAME.lower().replace(" ", "_"),
         source_schema_name=SOURCE_SCHEMA_NAME,
