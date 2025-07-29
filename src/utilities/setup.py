@@ -53,14 +53,17 @@ def validate_write_dispostiion(write_disposition: str) -> None:
     Validates the write disposition value.
     Raises ValueError if the value is not valid.
     """
-    valid_dispositions = ["append", "replace", "merge"]
+    valid_dispositions = ["append", "replace", "merge", "drop"]
     if write_disposition not in valid_dispositions:
         raise ValueError(
             f"Invalid write disposition: {write_disposition}. "
             f"Valid options are: {', '.join(valid_dispositions)}."
         )
+    if write_disposition == "drop":
+        write_disposition = None
     # TODO - Someday maybe
     elif write_disposition == "merge":
         raise ValueError(
             "We're not supporting merge as a write disposition yet - all pseduo-incremental loads are handled in dbt"
         )
+    return write_disposition

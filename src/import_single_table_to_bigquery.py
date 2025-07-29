@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import dlt
 from dlt.sources.sql_database import sql_database
+from sqlalchemy.dialects.postgresql import ARRAY, JSON, JSONB, VARCHAR
 
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
 from utilities.logger import logger
@@ -25,6 +26,13 @@ def table_adapter_callback(query, table):
     return query
 
 
+def type_adapter_callback(sql_type):
+    print(sql_type)
+    if isinstance(sql_type, (JSON, ARRAY, JSONB)):
+        return VARCHAR
+    return sql_type
+
+
 def run_import(
     vendor_name: str,
     source_schema_name: str,
@@ -43,7 +51,6 @@ def run_import(
         logger.info(
             f"{source_schema_name}.{table} -> {destination_schema_name}.{table}"
         )
-
     # Establish pipeline connection to BigQuery
     pipeline = dlt.pipeline(
         pipeline_name=f"tmc_{vendor_name}",
@@ -51,7 +58,6 @@ def run_import(
         dataset_name=destination_schema_name,
         progress=dlt.progress.log(log_period=60, logger=logger),
     )
-
     # Setup connection to source database
     source_postgres_connection = sql_database(
         credentials=connection_string,
@@ -59,7 +65,9 @@ def run_import(
         table_names=source_table_names,
         chunk_size=row_chunk_size,
         query_adapter_callback=table_adapter_callback,
+        type_adapter_callback=type_adapter_callback,
     )
+    source_postgres_connection.max_table_nesting = 0
 
     # Kick off the read -> write
     info = pipeline.run(source_postgres_connection, write_disposition=write_disposition)
@@ -87,9 +95,10 @@ if __name__ == "__main__":
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
 
     ROW_CHUNK_SIZE = int(os.environ.get("ROW_CHUNK_SIZE", 10_000))
-    WRITE_DISPOSITION = os.environ["SOURCE_WRITE_DISPOSITION"]
-    validate_write_dispostiion(WRITE_DISPOSITION)
 
+    write_disposition = validate_write_dispostiion(
+        os.environ["SOURCE_WRITE_DISPOSITION"]
+    )
     run_import(
         vendor_name=VENDOR_NAME.lower().replace(" ", "_"),
         source_schema_name=SOURCE_SCHEMA_NAME,
@@ -97,5 +106,5 @@ if __name__ == "__main__":
         destination_schema_name=DESTINATION_SCHEMA_NAME,
         connection_string=CONNECTION_STRING,
         row_chunk_size=ROW_CHUNK_SIZE,
-        write_disposition=WRITE_DISPOSITION,
+        write_disposition=write_disposition,
     )
