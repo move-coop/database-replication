@@ -27,7 +27,6 @@ def table_adapter_callback(query, table):
 
 
 def type_adapter_callback(sql_type):
-    print(sql_type)
     if isinstance(sql_type, (JSON, ARRAY, JSONB)):
         return VARCHAR
     return sql_type
