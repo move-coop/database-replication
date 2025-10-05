@@ -1,5 +1,8 @@
 # Running TODO List
 
+## Productionizing
+- [ ] - See if there's a base image with fewer vulnerabilities
+
 ## Configuration
 - [x] - Speed up runtime with filter and append logic
 - [ ] - Allow for incremental syncs

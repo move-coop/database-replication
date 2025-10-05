@@ -17,6 +17,9 @@ from utilities.setup import (
 
 
 def table_adapter_callback(query, table):
+    # TODO: make this a HOF and move env management
+    # to the "main" body. Holding off on incremental
+    # for now
     if os.environ.get("FILTER_CLAUSE"):
         from sqlalchemy.sql import text
 
@@ -89,7 +92,7 @@ if __name__ == "__main__":
 
     SOURCE_SCHEMA_NAME = os.environ["SOURCE_SCHEMA_NAME"]
     SOURCE_TABLE_NAMES = [
-        table.strip() for table in os.environ["SOURCE_TABLE_NAME"].split(",")
+        table.strip() for table in os.environ["SOURCE_TABLE_NAMES"].split(",")
     ]
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
 
