@@ -2,6 +2,7 @@ import json
 import os
 
 from dotenv import load_dotenv
+from utilities.logger import logger
 
 # TODO use more standard .env name
 load_dotenv(dotenv_path="test.env")
@@ -11,12 +12,14 @@ load_dotenv(dotenv_path="test.env")
 # Civis artifacts - we need to read this into memory and save the
 # env variable as a filepath
 if os.environ.get("SOURCE_SSL_CERT_PASSWORD"):
+    logger.debug("Writing source SSL certificate to disk...")
     with open("/app/src/certificate.crt", "w") as _fp:
         _fp.write(os.environ.get("SOURCE_SSL_CERT_PASSWORD"))
         os.environ["SOURCE_SSL_CERT"] = "/app/src/certificate.crt"
     os.chmod("/app/src/certificate.crt", 0o600)
 
 if os.environ.get("SOURCE_SSL_KEY_PASSWORD"):
+    logger.debug("Writing source SSL key to disk...")
     with open("/app/src/keyfile.key", "w") as _fp:
         _fp.write(os.environ.get("SOURCE_SSL_KEY_PASSWORD"))
         os.environ["SOURCE_SSL_KEY"] = "/app/src/keyfile.key"
