@@ -100,9 +100,14 @@ if __name__ == "__main__":
 
     # Source parameters
     CONNECTION_STRING = get_jdbc_connection_string(config=SQL_SOURCE_CONFIG)
+
+    if os.environ.get("LOCAL") == "true":
+        logger.warning("** LOCAL MODE ENABLED - THIS IS NOT FOR PRODUCTION USE **")
+        logger.debug(f"Connection string: {CONNECTION_STRING}")
+
     SOURCE_SCHEMA_NAME = os.environ["SOURCE_SCHEMA_NAME"]
     SOURCE_TABLE_NAMES = validate_source_tables(os.environ["SOURCE_TABLE_NAME"])
-    INCLUDE_VIEWS = os.environ.get("INCLUDE_VIEWS") != "false"
+    INCLUDE_VIEWS = os.environ.get("INCLUDE_VIEWS") == "true"
 
     # Destination parameters
     DESTINATION_SCHEMA_NAME = os.environ["DESTINATION_SCHEMA_NAME"]
