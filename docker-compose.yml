@@ -5,5 +5,8 @@ services:
       dockerfile: ./devops/Dockerfile
     env_file:
       - test.env
+    environment:
+      - DEBUG_LOG=true
+      - LOCAL=true
     volumes:
-      - .:/app
+      - ./service_accounts:/app/service_accounts

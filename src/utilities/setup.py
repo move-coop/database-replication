@@ -1,4 +1,5 @@
 import os
+from typing import List, Union
 from urllib.parse import quote  # Import the quote function for URL encoding
 
 from utilities.logger import logger
@@ -53,12 +54,15 @@ def validate_write_dispostiion(write_disposition: str) -> None:
     Validates the write disposition value.
     Raises ValueError if the value is not valid.
     """
+
     valid_dispositions = ["append", "replace", "merge", "drop"]
+
     if write_disposition not in valid_dispositions:
         raise ValueError(
             f"Invalid write disposition: {write_disposition}. "
             f"Valid options are: {', '.join(valid_dispositions)}."
         )
+
     if write_disposition == "drop":
         write_disposition = None
     # TODO - Someday maybe
@@ -67,3 +71,24 @@ def validate_write_dispostiion(write_disposition: str) -> None:
             "We're not supporting merge as a write disposition yet - all pseduo-incremental loads are handled in dbt"
         )
     return write_disposition
+
+
+def validate_source_tables(source_table_string: str) -> Union[List[str], None]:
+    """
+    If the user supplies 'ALL' in the runtime environment
+    we want to pass in `None` to the import function (this
+    is how dlt expects to handle all tables in a source schema)
+
+    Args:
+        source_table_string:    This should be a comma-separated list of tables in the environment (or 'ALL')
+
+    Returns:
+        Array of table names, or `None` if all tables are to be targeted
+    """
+
+    target_tables = [table.strip() for table in source_table_string.split(",")]
+
+    if len(target_tables) == 1 and target_tables[0].upper() == "ALL":
+        return
+
+    return target_tables
