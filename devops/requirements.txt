@@ -4,3 +4,4 @@ psycopg2
 dotenv
 psutil
 google-cloud-bigquery-storage
+click
