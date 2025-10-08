@@ -1,4 +1,3 @@
-import os
 from typing import List, Optional, Union
 
 import click
@@ -152,11 +151,11 @@ def main(
     local: bool,
 ):
     """Import data from a PostgreSQL database to BigQuery using dlt."""
-    
+
     if local:
         logger.warning("** LOCAL MODE ENABLED - THIS IS NOT FOR PRODUCTION USE **")
-    
-    logger.debug("** DEBUGGER ACTIVER **")
+
+    logger.debug("** DEBUGGER ACTIVE **")
 
     # Set up environment variables for dlt
     ENV_CONFIG = {**BIGQUERY_DESTINATION_CONFIG, **SQL_SOURCE_CONFIG}
