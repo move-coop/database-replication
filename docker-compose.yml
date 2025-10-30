@@ -2,7 +2,7 @@ services:
   tmc-dlt:
     build:
       context: .
-      dockerfile: ./devops/Dockerfile
+      dockerfile: ./devops/Dockerfile.dlt
     env_file:
       - test.env
     environment:

@@ -3,10 +3,10 @@ FROM python:3.12-bullseye
 WORKDIR /app
 
 # Cache dependencies to speed up builds
-COPY devops/requirements.txt .
-RUN pip install -r requirements.txt
+COPY devops/dlt-requirements.txt .
+RUN pip install -r dlt-requirements.txt
 
-COPY ./src /app/src
+COPY ./src/dlt /app/src
 WORKDIR /app/src
 
 # NOTE - This is to offset dlt's native behavior or normalizing destination schemas

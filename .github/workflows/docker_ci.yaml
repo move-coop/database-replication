@@ -1,4 +1,4 @@
-name: docker_build
+name: dlt_docker_build
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./devops/Dockerfile
+          file: ./devops/Dockerfile.dlt
           push: true
           tags: |
             movementcooperative/tmc-dlt:${{ github.sha }}

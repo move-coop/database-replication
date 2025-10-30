@@ -2,7 +2,6 @@ import json
 import os
 
 from dotenv import load_dotenv
-
 from utilities.logger import logger
 
 # TODO use more standard .env name

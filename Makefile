@@ -1,5 +1,5 @@
-run:
-	@docker compose up --build;
+dlt:
+	@docker compose up tmc-dlt --build;
 	
 
 ruff:

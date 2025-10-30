@@ -1,10 +1,7 @@
 from typing import List, Optional, Union
 
 import click
-import dlt
-from dlt.sources.sql_database import sql_database
 from sqlalchemy.dialects.postgresql import ARRAY, JSON, JSONB, VARCHAR
-
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
 from utilities.logger import logger
 from utilities.setup import (
@@ -13,6 +10,9 @@ from utilities.setup import (
     validate_source_tables,
     validate_write_dispostiion,
 )
+
+import dlt
+from dlt.sources.sql_database import sql_database
 
 ##########
 
@@ -24,10 +24,12 @@ def table_adapter_callback(query, table, filter_clause=None):
         query = query.where(text(filter_clause))
     return query
 
+
 def type_adapter_callback(sql_type):
     if isinstance(sql_type, (JSON, ARRAY, JSONB)):
         return VARCHAR
     return sql_type
+
 
 def run_import(
     vendor_name: str,
@@ -62,7 +64,7 @@ def run_import(
         pipeline_name=f"tmc_{vendor_name}",
         destination="bigquery",
         dataset_name=destination_schema_name,
-        progress=dlt.progress.log(log_period=60, logger=logger)
+        progress=dlt.progress.log(log_period=60, logger=logger),
     )
     # Setup connection to source database
     source_postgres_connection = sql_database(
@@ -83,61 +85,62 @@ def run_import(
 
 #####
 
+
 @click.command()
 @click.option(
     "--vendor-name",
     envvar="VENDOR_NAME",
     required=True,
-    help="Name of the vendor to sync (for alerting purposes)"
+    help="Name of the vendor to sync (for alerting purposes)",
 )
 @click.option(
     "--source-schema-name",
     envvar="SOURCE_SCHEMA_NAME",
     required=True,
-    help="Schema to replicate on the source database"
+    help="Schema to replicate on the source database",
 )
 @click.option(
     "--source-table-name",
     envvar="SOURCE_TABLE_NAME",
     required=True,
-    help="Comma-separated list of tables to replicate or 'all' for all tables"
+    help="Comma-separated list of tables to replicate or 'all' for all tables",
 )
 @click.option(
     "--destination-schema-name",
     envvar="DESTINATION_SCHEMA_NAME",
     required=True,
-    help="Schema to write to in the destination system"
+    help="Schema to write to in the destination system",
 )
 @click.option(
     "--source-write-disposition",
     envvar="SOURCE_WRITE_DISPOSITION",
     required=True,
     type=click.Choice(["append", "replace", "merge"]),
-    help="Write disposition: append, replace, or merge"
+    help="Write disposition: append, replace, or merge",
 )
 @click.option(
     "--row-chunk-size",
     envvar="ROW_CHUNK_SIZE",
     default=10000,
     type=int,
-    help="Number of rows to return in a single request"
+    help="Number of rows to return in a single request",
 )
 @click.option(
     "--include-views",
     envvar="INCLUDE_VIEWS",
     is_flag=True,
-    help="Include views in the replication"
+    help="Include views in the replication",
 )
 @click.option(
     "--filter-clause",
     envvar="FILTER_CLAUSE",
-    help="Optional SQL filter clause to apply to queries"
+    help="Optional SQL filter clause to apply to queries",
 )
 @click.option(
     "--local",
     envvar="LOCAL",
     is_flag=True,
-    help="Enable local mode for development (not for production)"
+    help="Enable local mode for development (not for production)",
 )
 def main(
     vendor_name: str,
