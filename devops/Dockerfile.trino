@@ -1,0 +1,12 @@
+FROM python:3.12-bullseye
+
+WORKDIR /app
+
+# Cache dependencies to speed up builds
+COPY devops/trino-requirements.txt .
+RUN pip install -r trino-requirements.txt
+
+COPY ./src/trino /app/src
+WORKDIR /app/src
+
+CMD ["python", "interface.py"]
