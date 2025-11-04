@@ -58,7 +58,7 @@ class SourceClient:
         port (int): The port for the source database.
         database (str): The database name for the source database.
         jdbc_driver (str): The JDBC driver for the source database.
-        jdbc_connection_string (Optional[str], optional): The full JDBC connection string. Defaults to None
+        jdbc_connection_string (Optional[str], optional): The full JDBC connection string. Defaults to None.
     """
 
     username: str
