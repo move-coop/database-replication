@@ -10,3 +10,13 @@ services:
       - LOCAL=true
     volumes:
       - ./service_accounts:/app/service_accounts
+
+  tmc-trino:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile.trino
+    env_file:
+      - trino.env
+    environment:
+      - DEBUG_LOG=true
+      - LOCAL=true
