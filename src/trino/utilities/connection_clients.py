@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from typing import Optional
 
 from sqlalchemy import create_engine
-from common.logger import logger
 
 import trino
+from common.logger import logger
 
 #####
 
