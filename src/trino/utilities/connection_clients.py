@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from sqlalchemy import create_engine
+from common.logger import logger
 
 import trino
 
@@ -45,6 +46,15 @@ class TrinoClient:
         finally:
             conn.close()
 
+    @contextmanager
+    def cursor(self):
+        with self.connection() as conn:
+            cursor = conn.cursor()
+            try:
+                yield cursor
+            finally:
+                cursor.close()
+
 
 @dataclass
 class SourceClient:
@@ -80,7 +90,7 @@ class SourceClient:
             connection_string = self.jdbc_connection_string
         else:
             connection_string = (
-                "jdbc:{DRIVER}://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}".format(
+                "jdbc+{DRIVER}://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}".format(
                     DRIVER=self.jdbc_driver,
                     USERNAME=self.username,
                     PASSWORD=self.password,
@@ -105,6 +115,19 @@ class SourceClient:
         finally:
             connection.close()
             engine.dispose()
+
+    @contextmanager
+    def cursor(self):
+        """
+        Context manager to create and dispose of a cursor from the source database connection.
+        """
+
+        with self.connection() as conn:
+            cursor = conn.connection.cursor()
+            try:
+                yield cursor
+            finally:
+                cursor.close()
 
 
 @dataclass
@@ -150,8 +173,24 @@ class ConnectionClient:
         Transfers data from the source table to the destination table.
         """
 
-        with self.source_client.connection() as _source_connection:
-            with self.destination_client.connection() as _destination_connection:
-                # TODO - Finish this up
-                # Implement data transfer logic here
-                pass
+        with self.source_client.cursor() as _source_cursor:
+            with self.destination_client.cursor() as _destination_cursor:
+                source_query = (
+                    f"SELECT * FROM {self.source_schema_name}.{self.source_table_name}"
+                )
+                if self.filter_clause:
+                    source_query += f" WHERE {self.filter_clause}"
+
+                _source_cursor.execute(source_query)
+
+                while True:
+                    rows = _source_cursor.fetchmany(self.row_chunk_size)
+
+                    if not rows:
+                        break
+
+                    # Insert rows into destination table
+                    for row in rows:
+                        placeholders = ", ".join(["%s"] * len(row))
+                        destination_query = f"INSERT INTO {self.destination_schema_name}.{self.destination_table_name} VALUES ({placeholders})"
+                        _destination_cursor.execute(destination_query, row)

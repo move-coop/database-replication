@@ -1,6 +1,13 @@
 import click
-from utilities.connection_clients import ConnectionClient, SourceClient, TrinoClient
-from utilities.setup import SOURCE_DATABASE_CREDENTIALS, TRINO_CONNECTION_CREDENTIALS
+from .utilities.connection_clients import (
+    ConnectionClient,
+    SourceClient,
+    TrinoClient,
+)
+from .utilities.setup import (
+    SOURCE_DATABASE_CREDENTIALS,
+    TRINO_CONNECTION_CREDENTIALS,
+)
 
 #####
 
@@ -37,16 +44,6 @@ def main(
         row_chunk_size=row_chunk_size,
         write_disposition=write_disposition,
     )
-
-    run_import(connection_client=connection_client)
-
-
-def run_import(
-    connection_client: ConnectionClient,
-):
-    """
-    NOTE - Kind of a goofy implementation
-    """
 
     connection_client.transfer()
 
