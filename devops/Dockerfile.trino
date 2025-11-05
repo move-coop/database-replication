@@ -7,6 +7,10 @@ COPY devops/trino-requirements.txt .
 RUN pip install -r trino-requirements.txt
 
 COPY ./src/trino /app/src
+
+# NOTE - This copies shared utilities into the Docker container (e.g., logging)
+COPY ./src/common/* /app/src/utilities
+
 WORKDIR /app/src
 
 CMD ["python", "interface.py"]
