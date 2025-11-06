@@ -10,3 +10,15 @@ services:
       - LOCAL=true
     volumes:
       - ./service_accounts:/app/service_accounts
+
+  tmc-sling:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile.sling
+    environment:
+      - DEBUG_LOG=true
+      - LOCAL=true
+    volumes:
+      - ./src/sling:/app/src
+      - ./service_accounts:/app/service_accounts

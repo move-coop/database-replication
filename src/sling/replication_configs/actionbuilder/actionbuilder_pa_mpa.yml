@@ -1,0 +1,47 @@
+source: actionbuilder_pa_mpa
+target: bigquery_data_warehouse
+
+defaults:
+  object: 'raw_actionbuilder__pa_mpa_sling.{stream_table}'
+  mode: incremental
+
+streams:
+  mpa.taggable_logbook:
+    sql: |
+      select *
+      from mpa.taggable_logbook
+      where {incremental_where_cond}
+    object: raw_actionbuilder__pa_mpa_sling.taggable_logbook
+    mode: incremental
+    update_key: id
+    source_options:
+      chunk_size: 500000
+  mpa.entity_sync_stored_operations:
+    primary_key: id
+    update_key: updated_at
+  mpa.action_entities:
+    primary_key: id
+    update_key: updated_at
+
+  mpa.addresses_electoral_districts:
+    primary_key: [address_id, electoral_district_ocd_id]
+    update_key: null
+    mode: truncate
+  mpa.electoral_districts:
+    primary_key: ocd_id
+    update_key: null
+    mode: truncate
+  mpa.active_storage_variant_records:
+    update_key: null
+    mode: truncate
+  mpa.active_storage_blobs:
+    update_key: null
+    mode: truncate
+  mpa.active_storage_attachments:
+    update_key: null
+    mode: truncate
+
+env:
+  SLING_THREADS: 8
+  SLING_RETRIES: 1
+  SLING_STATE: bigquery_data_warehouse/sling_state.state_table
