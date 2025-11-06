@@ -1,0 +1,26 @@
+# FROM slingdata/sling
+FROM python:3.12-bullseye
+
+WORKDIR /app
+
+# # Cache dependencies to speed up builds
+COPY devops/sling-requirements.txt .
+RUN pip install -r sling-requirements.txt
+# triggers the binary download
+RUN sling --version
+
+COPY ./src/sling /app/src
+WORKDIR /app/src
+
+# Set Sling Global Settings
+ENV SLING_HOME_DIR=/app/src
+ENV SLING_LOADED_AT_COLUMN=timestamp
+ENV SLING_STREAM_URL_COLUMN=true
+ENV SLING_ROW_ID_COLUMN=true
+ENV SLING_ROW_NUM_COLUMN=true
+ENV SLING_EXEC_ID_COLUMN=true
+ENV SLING_STATE=BIGQUERY_DATA_WAREHOUSE/sling_state.state_table
+ENV SLING_ALLOW_EMPTY=true
+ENV SLING_SHOW_PROGRESS=true
+
+CMD [ "sleep", "infinity" ]
