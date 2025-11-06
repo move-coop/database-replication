@@ -1,0 +1,37 @@
+source: actionbuilder_pa_fwa
+target: bigquery_data_warehouse
+
+defaults:
+  object: 'raw_actionbuilder__pa_fwa_sling.{stream_table}'
+  mode: incremental
+
+streams:
+  firelands.*:
+    primary_key: id
+    update_key: updated_at
+  firelands.addresses_electoral_districts:
+    primary_key: [address_id, electoral_district_ocd_id]
+    update_key: null
+    mode: truncate
+  firelands.electoral_districts:
+    primary_key: ocd_id
+    update_key: null
+    mode: truncate
+  firelands.active_storage_variant_records:
+    update_key: null
+    mode: truncate
+  firelands.active_storage_blobs:
+    update_key: null
+    mode: truncate
+  firelands.active_storage_attachments:
+    update_key: null
+    mode: truncate 
+  firelands.versions:
+    disabled: true
+  firelands.ar_internal_metadata:
+    disabled: true
+  firelands.schema_migrations:
+    disabled: true
+
+env:
+  SLING_THREADS: 8
