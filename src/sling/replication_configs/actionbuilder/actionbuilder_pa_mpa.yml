@@ -4,8 +4,6 @@ target: bigquery_data_warehouse
 defaults:
   object: 'raw_actionbuilder__pa_mpa_sling.{stream_table}'
   mode: incremental
-  # source_options:
-  #   chunk_size: 1d
 
 streams:
   mpa.taggable_logbook:
@@ -18,30 +16,30 @@ streams:
     update_key: id
     source_options:
       chunk_size: 500000
-  # mpa.entity_sync_stored_operations:
-  #   primary_key: id
-  #   update_key: updated_at
-  # mpa.action_entities:
-  #   primary_key: id
-  #   update_key: updated_at
+  mpa.entity_sync_stored_operations:
+    primary_key: id
+    update_key: updated_at
+  mpa.action_entities:
+    primary_key: id
+    update_key: updated_at
 
-  # mpa.addresses_electoral_districts:
-  #   primary_key: [address_id, electoral_district_ocd_id]
-  #   update_key: null
-  #   mode: truncate
-  # mpa.electoral_districts:
-  #   primary_key: ocd_id
-  #   update_key: null
-  #   mode: truncate
-  # mpa.active_storage_variant_records:
-  #   update_key: null
-  #   mode: truncate
-  # mpa.active_storage_blobs:
-  #   update_key: null
-  #   mode: truncate
-  # mpa.active_storage_attachments:
-  #   update_key: null
-  #   mode: truncate
+  mpa.addresses_electoral_districts:
+    primary_key: [address_id, electoral_district_ocd_id]
+    update_key: null
+    mode: truncate
+  mpa.electoral_districts:
+    primary_key: ocd_id
+    update_key: null
+    mode: truncate
+  mpa.active_storage_variant_records:
+    update_key: null
+    mode: truncate
+  mpa.active_storage_blobs:
+    update_key: null
+    mode: truncate
+  mpa.active_storage_attachments:
+    update_key: null
+    mode: truncate
 
 env:
   SLING_THREADS: 8

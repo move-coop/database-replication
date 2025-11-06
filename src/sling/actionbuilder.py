@@ -6,11 +6,11 @@ SOURCE_CONFIGS = [
         "source_schema": "mpa",
         "dest_schema": "raw_actionbuilder__pa_mpa_sling",
     },
-    # {
-    #     "source_name": "actionbuilder_pa_fwa",
-    #     "source_schema": "firelands",
-    #     "dest_schema": "raw_actionbuilder__pa_fwa_sling",
-    # },
+    {
+        "source_name": "actionbuilder_pa_fwa",
+        "source_schema": "firelands",
+        "dest_schema": "raw_actionbuilder__pa_fwa_sling",
+    },
 ]
 
 BASE_STREAM_CONFIGS = {
@@ -63,10 +63,6 @@ for source_config in SOURCE_CONFIGS:
         source=source_config["source_name"],
         target="bigquery_data_warehouse",
         streams=stream_configs,
-        # env=dict(
-        #     SLING_THREADS=8,
-        #     SLING_RETRIES=3,
-        # ),
         debug=True,
     )
 
