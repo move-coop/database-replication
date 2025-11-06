@@ -1,26 +1,18 @@
 import click
 from pyspark.sql import SparkSession
-from google.cloud import secretmanager
-from dataclasses import dataclass
-from enum import Enum
 
-class SrcDbType(Enum):
-    POSTGRESQL = "postgresql"
-
-@dataclass
-class SrcConfig:
-    driver: str
-    secret_id: str
+from src_config import SrcConfig
+from src_db_type import SrcDbType
 
 SOURCE_DB_DRIVERS: dict[SrcDbType, SrcConfig] = {
-    "postgres": SrcConfig(
+    SrcDbType.POSTGRESQL: SrcConfig(
         driver="org.postgresql.Driver",
         secret_id="wtr-read-replica",
     ),
 }
 
 @click.command()
-@click.option('--src-db-type', required=True, type=click.Choice(SrcDbType), help='Type of source database (e.g. mysql, postgres)')
+@click.option('--src-db-type', required=True, type=click.Choice(SrcDbType, case_sensitive=False), help='Type of source database (e.g. mysql, postgres)')
 @click.option('--src-protocol-action', default=None, help='Action specified in JDBC protocol for source database, if any')
 @click.option('--src-host', required=True, help='Host of source database')
 @click.option('--src-port', required=True, help='Port for source database, if any')
@@ -39,25 +31,20 @@ def main(
     """
     PySpark job that tests DB replication to GBQ via JDBC
     """
-    client = secretmanager.SecretManagerServiceClient()
-    def get_secret(secret_id: str) -> str:
-        name = client.secret_path("485513486873", secret_id)
-        response = client.get_secret(request={"name": name})
-        return response.payload.data.decode("UTF-8")
-
     src_jdbc_action = f":{src_protocol_action}" if src_protocol_action else ""
     src_jdbc_params = f"?{src_params}" if src_params else ""
-    src_jdbc_url = f"jdbc:{src_db_type}{src_jdbc_action}://{src_host}:{src_port}/{src_db_name}{src_jdbc_params}"
+    src_jdbc_url = f"jdbc:{src_db_type.value}{src_jdbc_action}://{src_host}:{src_port}/{src_db_name}{src_jdbc_params}"
 
     src_config = SOURCE_DB_DRIVERS[src_db_type]
     src_properties = {
         "user": src_user,
-        "password": get_secret(src_config.secret_id),
+        "password": "",
         "driver": src_config.driver,
     }
 
     spark = SparkSession.builder \
         .appName("DbReplicationTest") \
+        .master("spark://localhost:8080") \
         .getOrCreate()
 
     #query = "(SELECT * FROM public.message LIMIT 10) AS subquery"
