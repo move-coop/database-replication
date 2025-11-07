@@ -1,0 +1,4 @@
+click == 8.2.1
+pyspark == 3.5.6
+# Potential pyspark dependency conflict: https://github.com/GoogleCloudPlatform/dataproc-templates/blob/main/python/requirements.txt#L1
+google-dataproc-templates >= 2.0.0b0

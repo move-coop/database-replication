@@ -1,54 +1,45 @@
+from typing import Optional
 import click
-import os
 from pyspark.sql import SparkSession
-
-from src_config import SrcConfig
-from src_db_type import SrcDbType
-
-SOURCE_DB_DRIVERS: dict[SrcDbType, SrcConfig] = {
-    SrcDbType.POSTGRESQL: SrcConfig(
-        driver="org.postgresql.Driver",
-        secret_id="wtr-read-replica",
-    ),
-}
+from utilities.args import jdbc_to_gbq_options
 
 @click.command()
-@click.option('--src-db-type', required=True, type=click.Choice(SrcDbType, case_sensitive=False), help='Type of source database (e.g. mysql, postgres)')
-@click.option('--src-protocol-action', default=None, help='Action specified in JDBC protocol for source database, if any')
-@click.option('--src-host', required=True, help='Host of source database')
-@click.option('--src-port', required=True, help='Port for source database, if any')
-@click.option('--src-db-name', required=True, help='Database name of source database')
-@click.option('--src-params', default=None, help='Connection parameters for source database, if any')
-@click.option('--src-user', required=True, help='User to connect to source database with')
+@jdbc_to_gbq_options
 def main(
-    src_db_type: SrcDbType,
-    src_protocol_action: str,
-    src_host: str,
-    src_port: int,
-    src_db_name: str,
-    src_params: str,
-    src_user: str,
+    input_url_secret: str,
+    input_driver: str,
+    input_table: Optional[str] = None,
+    input_partition_column: Optional[str] = None,
+    input_lower_bound: Optional[str] = None,
+    input_upper_bound: Optional[str] = None,
+    input_fetch_size: Optional[str] = None,
+    input_session_init_statement: Optional[str] = None,
+    num_partitions: Optional[int] = None,
+    output_mode: Optional[str] = None,
 ):
     """
-    PySpark job that tests DB replication to GBQ via JDBC
+    PySpark job that replicates a JDBC-connected database to GBQ.
+
+    Simple wrapper around this template:
+    https://github.com/GoogleCloudPlatform/dataproc-templates/tree/main/python/dataproc_templates/jdbc#arguments-2
     """
-    src_jdbc_action = f":{src_protocol_action}" if src_protocol_action else ""
-    src_jdbc_params = f"?{src_params}" if src_params else ""
-    src_jdbc_url = f"jdbc:{src_db_type.value}{src_jdbc_action}://{src_host}:{src_port}/{src_db_name}{src_jdbc_params}"
-
-    src_config = SOURCE_DB_DRIVERS[src_db_type]
-    src_properties = {
-        "user": src_user,
-        "password": os.environ['WTR_READ_REPLICA_PASSWORD'],
-        "driver": src_config.driver,
-    }
-
     spark = SparkSession.builder \
-        .appName("DbReplicationTest") \
-        .master("spark://localhost:46411") \
+        .appName("JdbcToGbq") \
         .getOrCreate()
 
-    data = ["Hello", "World", "PySpark", "Job"]
+    data = [
+        input_url_secret,
+        input_driver,
+        input_table,
+        input_partition_column,
+        input_lower_bound,
+        input_upper_bound,
+        input_fetch_size,
+        input_session_init_statement,
+        num_partitions,
+        output_mode
+    ]
+    print(data)
     rdd = spark.sparkContext.parallelize(data)
     print(f"Number of elements in RDD: {rdd.count()}")
 
