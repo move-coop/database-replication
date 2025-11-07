@@ -48,9 +48,9 @@ def main(
         .master("spark://localhost:46411") \
         .getOrCreate()
 
-    query = "(SELECT * FROM public.message LIMIT 10) AS subquery"
-    df = spark.read.jdbc(url=src_jdbc_url, table=query, properties=src_properties)
-    df.show()
+    data = ["Hello", "World", "PySpark", "Job"]
+    rdd = spark.sparkContext.parallelize(data)
+    print(f"Number of elements in RDD: {rdd.count()}")
 
     spark.stop()
 
