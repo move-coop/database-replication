@@ -1,9 +1,9 @@
 from typing import Optional
 import click
 import re
-from google.cloud import dataproc_v1
+from google.cloud import dataproc_v1 as dataproc
 from google.cloud import storage
-from utilities.args import jdbc_to_gbq_options
+from args import jdbc_to_gbq_options
 
 # TODO: Make this configurable in CI
 GCP_PROJECT = "tmc-data-transfer"
@@ -22,18 +22,17 @@ def main(**kwargs):
         - https://github.com/googleapis/google-cloud-python/blob/2feb74032fd9c5cc7eaf6072ab03e9e8397bd434/packages/google-cloud-dataproc/google/cloud/dataproc_v1/types/jobs.py#L305
     """
     # TODO: Make this configurable in CI
-    job_client = dataproc_v1.JobControllerClient(
+    job_client = dataproc.JobControllerClient(
         client_options={
             "api_endpoint": f"{DATAPROC_CLUSTER_REGION}-dataproc.googleapis.com:443",
         }
     )
 
-    gcs_utilities_folder = f"{GCS_PARENT_FOLDER}/utilities"
     args = []
     for key, value in kwargs.items():
         if value is not None:
             args.append(f"--{key.replace('_', '-')}")
-            args.append(value)
+            args.append(str(value))
     job_config = {
         "placement": {
             "cluster_name": DATAPROC_CLUSTER_NAME,
@@ -41,8 +40,8 @@ def main(**kwargs):
         "pyspark_job": {
             "main_python_file_uri": f"{GCS_PARENT_FOLDER}/job.py",
             "python_file_uris": [
-                f"{gcs_utilities_folder}/args.py",
-                f"{gcs_utilities_folder}/driver.py"
+                f"{GCS_PARENT_FOLDER}/args.py",
+                f"{GCS_PARENT_FOLDER}/driver.py"
             ],
             "args": args,
         },

@@ -1,7 +1,7 @@
 from typing import Optional
 import click
 from pyspark.sql import SparkSession
-from utilities.args import jdbc_to_gbq_options
+from args import jdbc_to_gbq_options
 
 @click.command()
 @jdbc_to_gbq_options

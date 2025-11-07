@@ -1,7 +1,7 @@
 import click
 import functools
 
-from utilities.driver import Driver
+from driver import Driver
 
 def jdbc_to_gbq_options(f: callable) -> callable:
     """
