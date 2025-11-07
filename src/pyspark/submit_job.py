@@ -29,12 +29,14 @@ def main(**kwargs):
         }
     )
 
+    # Reserialize click command line args into list of strings
     args = []
     for key, value in kwargs.items():
         if value is not None:
             args.append(f"--{key.replace('_', '-')}")
             arg_value = value.name if isinstance(value, Enum) else str(value)
             args.append(arg_value)
+    
     job_config = {
         "placement": {
             "cluster_name": DATAPROC_CLUSTER_NAME,
@@ -48,7 +50,7 @@ def main(**kwargs):
             "args": args,
         },
     }
-
+    
     operation = job_client.submit_job_as_operation(
         request={
             "project_id": GCP_PROJECT,
@@ -57,7 +59,6 @@ def main(**kwargs):
         }
     )
     response = operation.result()
-
     # Dataproc job output is saved to the Cloud Storage bucket
     # allocated to the job. Use regex to obtain the bucket and blob info.
     matches = re.match("gs://(.*?)/(.*)", response.driver_output_resource_uri)
