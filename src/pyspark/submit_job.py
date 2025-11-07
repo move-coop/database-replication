@@ -4,7 +4,7 @@ import re
 from google.cloud import dataproc_v1 as dataproc
 from google.cloud import storage
 from args import jdbc_to_gbq_options
-from driver import Driver
+from enum import Enum
 
 # TODO: Make this configurable in CI
 GCP_PROJECT = "tmc-data-transfer"
@@ -33,7 +33,7 @@ def main(**kwargs):
     for key, value in kwargs.items():
         if value is not None:
             args.append(f"--{key.replace('_', '-')}")
-            arg_value = value.name if isinstance(value, Driver) else str(value)
+            arg_value = value.name if isinstance(value, Enum) else str(value)
             args.append(arg_value)
     job_config = {
         "placement": {
