@@ -1,4 +1,5 @@
 import click
+import os
 from pyspark.sql import SparkSession
 
 from src_config import SrcConfig
@@ -38,18 +39,18 @@ def main(
     src_config = SOURCE_DB_DRIVERS[src_db_type]
     src_properties = {
         "user": src_user,
-        "password": "",
+        "password": os.environ['WTR_READ_REPLICA_PASSWORD'],
         "driver": src_config.driver,
     }
 
     spark = SparkSession.builder \
         .appName("DbReplicationTest") \
-        .master("spark://localhost:8080") \
+        .master("spark://localhost:46411") \
         .getOrCreate()
 
-    #query = "(SELECT * FROM public.message LIMIT 10) AS subquery"
-    #df = spark.read.jdbc(url=src_jdbc_url, table=query, properties=src_properties)
-    #df.show()
+    query = "(SELECT * FROM public.message LIMIT 10) AS subquery"
+    df = spark.read.jdbc(url=src_jdbc_url, table=query, properties=src_properties)
+    df.show()
 
     print(f"{src_user} @ {src_jdbc_url}")
 
