@@ -52,8 +52,6 @@ def main(
     df = spark.read.jdbc(url=src_jdbc_url, table=query, properties=src_properties)
     df.show()
 
-    print(f"{src_user} @ {src_jdbc_url}")
-
     spark.stop()
 
 if __name__ == '__main__':
