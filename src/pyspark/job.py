@@ -2,12 +2,13 @@ from typing import Optional
 import click
 from pyspark.sql import SparkSession
 from args import jdbc_to_gbq_options
+from driver import Driver
 
 @click.command()
 @jdbc_to_gbq_options
 def main(
     input_url_secret: str,
-    input_driver: str,
+    input_driver: Driver,
     input_table: Optional[str] = None,
     input_partition_column: Optional[str] = None,
     input_lower_bound: Optional[str] = None,
@@ -40,7 +41,7 @@ def main(
         output_mode
     ]
     print(data)
-    rdd = spark.sparkContext.parallelize(data)
+    rdd = spark.sparkContext.parallelize(["one", "two", "three", "four", "five"])
     print(f"Number of elements in RDD: {rdd.count()}")
 
     spark.stop()
