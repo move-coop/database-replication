@@ -1,0 +1,5 @@
+google-cloud-dataproc >= 5.23.0
+google-cloud-storage >= 3.5.0
+# For consistency's sake, this is the same version installed on cluster
+# and the same version defined in cluster-requirements.txt
+click == 8.2.1
