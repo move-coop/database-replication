@@ -336,23 +336,33 @@ class ConnectionClient:
                     logger.info(
                         f"Inserting {len(rows)} rows into {self.destination_schema_name}.{self.destination_table_name}..."
                     )
+                    # This array gets the values added to it for each row
+                    values_batch = []
                     for row in rows:
                         # Format values for Trino (no parameterized queries)
                         formatted_values = []
                         for value in row:
                             if value is None:
                                 formatted_values.append("NULL")
+
                             elif isinstance(value, str):
                                 # Escape single quotes and wrap in quotes
                                 escaped_value = value.replace("'", "''")
                                 formatted_values.append(f"'{escaped_value}'")
+
                             elif isinstance(value, (int, float)):
                                 formatted_values.append(str(value))
+
                             else:
                                 # Convert other types to string and quote
                                 formatted_values.append(f"'{str(value)}'")
 
                         values_str = ", ".join(formatted_values)
-                        destination_query = f"INSERT INTO {self.destination_schema_name}.{self.destination_table_name} VALUES({values_str})"
+                        values_batch.append(f"({values_str})")
+
+                    # Batch insert all rows at once
+                    if values_batch:
+                        values_batch_str = ", ".join(values_batch)
+                        destination_query = f"INSERT INTO {self.destination_schema_name}.{self.destination_table_name} VALUES {values_batch_str}"
                         logger.debug(destination_query)
                         _destination_cursor.execute(destination_query)
