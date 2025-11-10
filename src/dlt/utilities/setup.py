@@ -2,7 +2,7 @@ import os
 from typing import List, Union
 from urllib.parse import quote  # Import the quote function for URL encoding
 
-from utilities.logger import logger
+from common.logger import logger
 
 
 def set_dlt_environment_variables(config: dict) -> None:
