@@ -14,7 +14,7 @@ SOURCE_DATABASE_CREDENTIALS = {
     "port": int(os.getenv("SOURCE_DB_PORT", "5432")),
     "username": os.getenv("SOURCE_DB_USERNAME", "source_user"),
     "password": os.getenv("SOURCE_DB_PASSWORD", "source_password"),
-    "database": os.getenv("SOURCE_DB_NAME", "source_database"),
+    "database": os.getenv("SOURCE_DB_DATABASE", "source_database"),
     "jdbc_driver": os.getenv("SOURCE_DB_JDBC_DRIVER", "postgresql"),
     "jdbc_connection_string": os.getenv("SOURCE_DB_JDBC_CONNECTION_STRING", None),
 }

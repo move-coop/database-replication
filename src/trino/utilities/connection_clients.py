@@ -37,7 +37,6 @@ class TrinoClient:
             host=self.host,
             port=self.port,
             user=self.username,
-            password=self.password,
             catalog=self.catalog,
             schema=self.schema,
         )
@@ -90,7 +89,7 @@ class SourceClient:
             connection_string = self.jdbc_connection_string
         else:
             connection_string = (
-                "jdbc+{DRIVER}://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}".format(
+                "{DRIVER}://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}".format(
                     DRIVER=self.jdbc_driver,
                     USERNAME=self.username,
                     PASSWORD=self.password,
@@ -181,15 +180,21 @@ class ConnectionClient:
                 if self.filter_clause:
                     source_query += f" WHERE {self.filter_clause}"
 
+                logger.debug(f"Executing source query: {source_query}")
                 _source_cursor.execute(source_query)
 
                 while True:
+                    logger.debug("Fetching next chunk of rows from source...")
                     rows = _source_cursor.fetchmany(self.row_chunk_size)
 
                     if not rows:
+                        logger.info("No more rows to fetch from source.")
                         break
 
                     # Insert rows into destination table
+                    logger.info(
+                        f"Inserting {len(rows)} rows into {self.destination_schema_name}.{self.destination_table_name}..."
+                    )
                     for row in rows:
                         placeholders = ", ".join(["%s"] * len(row))
                         destination_query = f"INSERT INTO {self.destination_schema_name}.{self.destination_table_name} VALUES ({placeholders})"
