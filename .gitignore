@@ -12,3 +12,4 @@ secrets.toml
 **/*.env
 service_accounts/
 test_jdbc_store.json
+.catalogs/
