@@ -16,9 +16,17 @@ docker:
 
 	@docker push ianrichardferguson/tmc-dlt:latest
 
+trino:
+	@docker compose up tmc-trino --build;
+
+trino-shell:
+	@docker compose up tmc-trino --build -d;
+	@docker compose exec -it tmc-trino /bin/bash;
+
 
 # NOTE - This is just a QOL target to help with establishing an SSH tunnel to the Dataproc cluster.
-ssh-tunnel:
+# E.g., make tunnel PORT=8060
+tunnel:
 	@if [ -z "$$PORT" ]; then \
 		echo "Error: PORT environment variable is not set."; \
 		exit 1; \
@@ -30,4 +38,4 @@ ssh-tunnel:
     --tunnel-through-iap \
     --project "tmc-data-transfer" \
     -- \
-    -L $$PORT:localhost:8060
+    -L $$PORT:localhost:$$PORT
