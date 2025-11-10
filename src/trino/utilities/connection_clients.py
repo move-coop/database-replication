@@ -2,8 +2,6 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy import create_engine
-
 import trino
 from common.logger import logger
 
@@ -63,19 +61,71 @@ class TrinoClient:
     ):
         """
         Build a table in the destination catalog and schema by copying data from the source table.
+        Handles data type compatibility between source and destination catalogs.
         """
 
         # If destination_table is not provided, use source_table name
         destination_table = destination_table or source_table
 
-        # TODO - Resolve SQL injection risk with parameters
-        create_table_query = f"""
-        CREATE TABLE {self.catalog}.{self.schema}.{destination_table} AS
-        SELECT * FROM {source_catalog}.{source_schema}.{source_table}
-        """
-        logger.debug(f"Executing query: {create_table_query}")
+        logger.info("Building table...")
+        logger.info(f"Source: {source_catalog}.{source_schema}.{source_table}")
+        logger.info(f"Destination: {self.catalog}.{self.schema}.{destination_table}")
 
+        # Get column information to handle type conversions
         with self.cursor() as cursor:
+            # Get column metadata from information schema
+            columns_query = f"""
+            SELECT column_name, data_type 
+            FROM {source_catalog}.information_schema.columns 
+            WHERE table_schema = '{source_schema}' 
+            AND table_name = '{source_table}'
+            ORDER BY ordinal_position
+            """
+
+            cursor.execute(columns_query)
+            columns = cursor.fetchall()
+
+            if not columns:
+                raise ValueError(
+                    f"No columns found for table {source_catalog}.{source_schema}.{source_table}"
+                )
+
+            # Build SELECT clause with type conversions
+            select_columns = []
+            for column_name, data_type in columns:
+                if data_type.lower() in ["json", "jsonb"]:
+                    # Convert JSON to VARCHAR using JSON_FORMAT for complex JSON structures
+                    # This handles arrays and nested objects properly
+                    select_columns.append(
+                        f"JSON_FORMAT({column_name}) AS {column_name}"
+                    )
+                elif data_type.lower() in ["uuid"]:
+                    # Convert UUID to VARCHAR for compatibility
+                    select_columns.append(
+                        f"CAST({column_name} AS VARCHAR) AS {column_name}"
+                    )
+                elif (
+                    "timestamp" in data_type.lower() and "timezone" in data_type.lower()
+                ):
+                    # Handle timezone-aware timestamps
+                    select_columns.append(
+                        f"CAST({column_name} AS TIMESTAMP) AS {column_name}"
+                    )
+                else:
+                    # Keep column as-is for compatible types
+                    select_columns.append(column_name)
+
+            select_clause = ",\n    ".join(select_columns)
+
+            # Build the CREATE TABLE AS query with type conversions
+            create_table_query = f"""
+            CREATE TABLE {self.catalog}.{self.schema}.{destination_table} AS
+            SELECT 
+                {select_clause}
+            FROM {source_catalog}.{source_schema}.{source_table}
+            """
+
+            logger.debug(f"Executing query: {create_table_query}")
             cursor.execute(create_table_query)
 
         logger.info(

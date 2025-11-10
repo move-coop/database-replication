@@ -1,3 +1,5 @@
+from typing import Optional
+
 import click
 from utilities.connection_clients import (
     TrinoClient,
@@ -7,7 +9,6 @@ from utilities.setup import (
 )
 
 from common.logger import logger
-from typing import Optional
 
 #####
 
