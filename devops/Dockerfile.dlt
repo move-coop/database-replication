@@ -7,6 +7,10 @@ COPY devops/dlt-requirements.txt .
 RUN pip install -r dlt-requirements.txt
 
 COPY ./src/dlt /app/src
+
+# NOTE - This copies shared utilities into the Docker container (e.g., logging)
+COPY ./src/common/* /app/src/utilities
+
 WORKDIR /app/src
 
 # NOTE - This is to offset dlt's native behavior or normalizing destination schemas

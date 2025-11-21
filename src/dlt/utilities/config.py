@@ -2,7 +2,8 @@ import json
 import os
 
 from dotenv import load_dotenv
-from utilities.logger import logger
+
+from common.logger import logger
 
 # TODO use more standard .env name
 load_dotenv(dotenv_path="test.env")

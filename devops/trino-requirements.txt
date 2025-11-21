@@ -1,0 +1,5 @@
+google-cloud-bigquery-storage==2.34.0
+click==8.3.0
+trino==0.336.0
+sqlalchemy
+psycopg2==2.9.11

@@ -1,9 +1,9 @@
 from typing import List, Optional, Union
 
 import click
+from dlt.sources.sql_database import sql_database
 from sqlalchemy.dialects.postgresql import ARRAY, JSON, JSONB, VARCHAR
 from utilities.config import BIGQUERY_DESTINATION_CONFIG, SQL_SOURCE_CONFIG
-from utilities.logger import logger
 from utilities.setup import (
     get_jdbc_connection_string,
     set_dlt_environment_variables,
@@ -12,7 +12,7 @@ from utilities.setup import (
 )
 
 import dlt
-from dlt.sources.sql_database import sql_database
+from common.logger import logger
 
 ##########
 
