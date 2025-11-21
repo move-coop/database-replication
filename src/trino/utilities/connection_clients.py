@@ -7,6 +7,12 @@ from common.logger import logger
 
 #####
 
+TYPE_MAPPER = {
+    "json": "JSON_FORMAT({column_name}) AS {column_name}",
+    "jsonb": "JSON_FORMAT({column_name}) AS {column_name}",
+    "uuid": "CAST({column_name} AS VARCHAR) AS {column_name}",
+}
+
 
 @dataclass
 class TrinoClient:
@@ -93,16 +99,9 @@ class TrinoClient:
             # Build SELECT clause with type conversions
             select_columns = []
             for column_name, data_type in columns:
-                if data_type.lower() in ["json", "jsonb"]:
-                    # Convert JSON to VARCHAR using JSON_FORMAT for complex JSON structures
-                    # This handles arrays and nested objects properly
+                if data_type.lower() in TYPE_MAPPER.keys():
                     select_columns.append(
-                        f"JSON_FORMAT({column_name}) AS {column_name}"
-                    )
-                elif data_type.lower() in ["uuid"]:
-                    # Convert UUID to VARCHAR for compatibility
-                    select_columns.append(
-                        f"CAST({column_name} AS VARCHAR) AS {column_name}"
+                        TYPE_MAPPER[data_type.lower()].format(column_name=column_name)
                     )
                 elif (
                     "timestamp" in data_type.lower() and "timezone" in data_type.lower()
